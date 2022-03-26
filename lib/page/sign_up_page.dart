@@ -1,54 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../widget/custom_button.dart';
-import '../widget/custom_textfield.dart';
-import '../widget/loading_indicator.dart';
+import 'package:sneaker/widget/custom_textfield.dart';
+import 'package:sneaker/widget/loading_indicator.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_states.dart';
 import '../theme/color.dart';
 import '../theme/size.dart';
 import '../theme/text.dart';
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignUpPageState extends State<SignUpPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    Widget header() {
-      return Container(
-        margin: const EdgeInsets.only(top: AppSize.mainMargin * 3),
-        child: Column(
-          children: [
-            Image.asset(
-              'assets/sneakers.png',
-              width: 70,
-              color: accentColor,
-            ),
-            const SizedBox(
-              height: AppSize.contentMargin / 2,
-            ),
-            Text(
-              'Sneakers',
-              style: GoogleFonts.rancho(
-                fontSize: 40,
-                letterSpacing: 3,
-                color: accentColor,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     Widget inputTextfield() {
       return BlocBuilder<AuthCubit, AuthStates>(
         builder: (context, states) {
@@ -56,17 +30,32 @@ class _SignInPageState extends State<SignInPage> {
             padding: const EdgeInsets.only(
               left: AppSize.mainMargin,
               right: AppSize.mainMargin,
-              top: AppSize.contentMargin * 3,
+              top: AppSize.mainMargin * 3,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Login',
+                  'Register',
                   style: titleText.copyWith(
                     color: textColor,
                     fontWeight: semiBold,
                   ),
+                ),
+                const SizedBox(
+                  height: AppSize.contentMargin,
+                ),
+                CustomTextField(
+                    controller: _nameController,
+                    hintText: 'Enter your full name',
+                    label: 'Name'),
+                const SizedBox(
+                  height: AppSize.contentMargin,
+                ),
+                CustomTextField(
+                  controller: _usernameController,
+                  label: 'Username',
+                  hintText: 'Enter your username',
                 ),
                 const SizedBox(
                   height: AppSize.contentMargin,
@@ -97,15 +86,19 @@ class _SignInPageState extends State<SignInPage> {
         listener: (context, state) {
           if (state is LoggedState) {
             Navigator.pushNamedAndRemoveUntil(
-                context, '/home', (route) => false);
+                context, '/home  ', (route) => false);
           } else if (state is FailedState) {
             Get.snackbar(
               'Oops!',
-              'gagal login',
-              margin: const EdgeInsets.only(top: 10, left: 10, right: 10),
+              'Failed to login',
+              margin: const EdgeInsets.only(
+                top: 10,
+                left: 10,
+                right: 10,
+              ),
+              duration: const Duration(seconds: 1),
               backgroundColor: errorColor,
               colorText: textColor,
-              duration: const Duration(seconds: 1),
               icon: Icon(
                 Icons.warning,
                 color: textColor,
@@ -117,14 +110,41 @@ class _SignInPageState extends State<SignInPage> {
           if (state is LoadingState) {
             return const LoadingIndicator();
           }
-          return CustomButton(
-            text: 'Login Now',
-            onPressed: () {
-              BlocProvider.of<AuthCubit>(context).signIn(
-                _emailController.text,
-                _passwordController.text,
-              );
-            },
+          return Container(
+            margin: const EdgeInsets.only(
+              top: AppSize.contentMargin * 2,
+              left: AppSize.mainMargin,
+              right: AppSize.mainMargin,
+            ),
+            width: double.infinity,
+            height: 55,
+            decoration: BoxDecoration(
+              gradient: gradientColor,
+              // color: primaryColor,
+              borderRadius: BorderRadius.circular(AppSize.radius),
+            ),
+            child: TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSize.radius),
+                ),
+              ),
+              onPressed: () {
+                BlocProvider.of<AuthCubit>(context).signUp(
+                  _nameController.text,
+                  _usernameController.text,
+                  _emailController.text,
+                  _passwordController.text,
+                );
+              },
+              child: Text(
+                'Register Now',
+                style: bodyText.copyWith(
+                  color: backgroundColor,
+                  fontWeight: semiBold,
+                ),
+              ),
+            ),
           );
         },
       );
@@ -146,17 +166,17 @@ class _SignInPageState extends State<SignInPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Not a member? ',
+              'Already have an account? ',
               style: detailText.copyWith(
                 color: textColor.withOpacity(0.5),
               ),
             ),
             TextButton(
               onPressed: () {
-                Get.toNamed('/signup');
+                Get.toNamed('/signin');
               },
               child: Text(
-                'Join Now',
+                'Login here',
                 style: detailText.copyWith(
                   color: primaryColor,
                 ),
@@ -175,7 +195,6 @@ class _SignInPageState extends State<SignInPage> {
           children: [
             Column(
               children: [
-                header(),
                 loginForm(),
               ],
             ),
